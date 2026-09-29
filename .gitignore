@@ -1,2 +1,34 @@
-# Project exclude paths
-/node_modules/
+### Node.js (downstream-services) ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.env
+.env.*
+!.env.example
+
+### JetBrains IDEs (IntelliJ IDEA / WebStorm) ###
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+### Junie (JetBrains AI agent) ###
+.junie/
+
+### VS Code ###
+.vscode/
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Logs ###
+logs/
+*.log
+
+### Misc ###
+*.tmp
+*.bak
