@@ -1,0 +1,29 @@
+{
+  "name": "order-management-agent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@google/genai": "^2.24.0",
+    "@temporalio/client": "^1.24.0",
+    "dotenv": "^18.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "@google/genai@2.24.0": true,
+    "esbuild@0.28.2": true,
+    "protobufjs@8.8.0": true,
+    "protobufjs@7.6.6": true
+  }
+}
