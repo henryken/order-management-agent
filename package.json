@@ -4,26 +4,35 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "worker": "tsx src/worker.ts",
+    "client": "tsx src/client.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
+    "@google/adk": ">=1.5.0 <1.6.0",
     "@google/genai": "^2.24.0",
     "@temporalio/client": "^1.24.0",
+    "@temporalio/google-adk-agents": "^1.24.0",
+    "@temporalio/worker": "^1.24.0",
+    "@temporalio/workflow": "^1.24.0",
     "dotenv": "^18.0.4"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "webpack": "^5.111.1"
   },
   "allowScripts": {
     "@google/genai@2.24.0": true,
     "esbuild@0.28.2": true,
     "protobufjs@8.8.0": true,
-    "protobufjs@7.6.6": true
+    "protobufjs@7.6.6": true,
+    "@google/genai@1.52.0": true,
+    "@swc/core@1.16.12": true
   }
 }
