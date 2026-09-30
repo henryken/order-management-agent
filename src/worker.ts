@@ -1,8 +1,10 @@
 import {createRequire} from 'node:module';
 import * as dotenv from 'dotenv';
-import {Worker} from '@temporalio/worker';
+import {Client, Connection} from '@temporalio/client';
+import {NativeConnection, Worker} from '@temporalio/worker';
 import {GoogleAdkPlugin} from '@temporalio/google-adk-agents';
 import webpack from 'webpack';
+import {createActivities} from './activities.js';
 
 // Load environment variables (e.g., GEMINI_API_KEY) before the worker starts
 // executing model Activities that need them.
@@ -11,9 +13,16 @@ dotenv.config();
 const require = createRequire(import.meta.url);
 
 async function runWorker() {
+    const address = process.env.TEMPORAL_ADDRESS ?? 'localhost:7233';
+    const clientConnection = await Connection.connect({address});
+    const client = new Client({connection: clientConnection});
+    const connection = await NativeConnection.connect({address});
+
     const worker = await Worker.create({
+        connection,
         workflowsPath: require.resolve('./workflow'),
         taskQueue: 'order-agent-queue',
+        activities: createActivities(client),
         plugins: [
             // Injects the TemporalModel activities and bundler configs
             new GoogleAdkPlugin(),
@@ -48,6 +57,8 @@ async function runWorker() {
 
     console.log('👷 Starting Temporal ADK Worker...');
     await worker.run();
+    await connection.close();
+    await clientConnection.close();
 }
 
 runWorker().catch(console.error);
