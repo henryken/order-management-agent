@@ -9,6 +9,7 @@ function env(name: string, fallback: string): string {
 }
 
 export const config = {
+    mcpServerPort: Number(env('MCP_SERVER_PORT', '3100')),
     temporalAddress: env('TEMPORAL_ADDRESS', 'localhost:7233'),
     temporalNamespace: env('TEMPORAL_NAMESPACE', 'default'),
 };
