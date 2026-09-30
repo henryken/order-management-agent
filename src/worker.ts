@@ -1,12 +1,16 @@
 import {createRequire} from 'node:module';
+import {Client, Connection} from '@temporalio/client';
 import {NativeConnection, Worker} from '@temporalio/worker';
 import {GoogleAdkPlugin} from '@temporalio/google-adk-agents';
 import webpack from 'webpack';
+import {createActivities} from './activities.js';
 import {config, temporalConnectionOptions} from './config.js';
 
 const require = createRequire(import.meta.url);
 
 async function runWorker() {
+    const clientConnection = await Connection.connect(temporalConnectionOptions);
+    const client = new Client({connection: clientConnection, namespace: config.temporalNamespace});
     const connection = await NativeConnection.connect(temporalConnectionOptions);
 
     const worker = await Worker.create({
@@ -14,6 +18,7 @@ async function runWorker() {
         namespace: config.temporalNamespace,
         workflowsPath: require.resolve('./workflow'),
         taskQueue: 'order-agent-queue',
+        activities: createActivities(client),
         plugins: [
             // Injects the TemporalModel activities and bundler configs
             new GoogleAdkPlugin(),
@@ -49,6 +54,7 @@ async function runWorker() {
     console.log('👷 Starting Temporal ADK Worker...');
     await worker.run();
     await connection.close();
+    await clientConnection.close();
 }
 
 runWorker().catch(console.error);
