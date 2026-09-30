@@ -6,7 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "worker": "tsx src/worker.ts",
-    "client": "tsx src/client.ts"
+    "client": "tsx src/client.ts",
+    "mcp-server": "tsx src/mcp-server.ts",
+    "mcp-inspect": "mcp-inspector http://localhost:3100/mcp",
+    "mcp-list-tools": "mcp-inspector --cli http://localhost:3100/mcp --method tools/list"
   },
   "keywords": [],
   "author": "",
@@ -15,13 +18,17 @@
   "dependencies": {
     "@google/adk": ">=1.5.0 <1.6.0",
     "@google/genai": "^2.24.0",
+    "@modelcontextprotocol/sdk": "^1.31.0",
     "@temporalio/client": "^1.24.0",
     "@temporalio/google-adk-agents": "^1.24.0",
     "@temporalio/worker": "^1.24.0",
     "@temporalio/workflow": "^1.24.0",
-    "dotenv": "^18.0.4"
+    "dotenv": "^18.0.4",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@modelcontextprotocol/inspector": "^2.8.0",
+    "@types/express": "^5.0.6",
     "@types/node": "^26.6.3",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
