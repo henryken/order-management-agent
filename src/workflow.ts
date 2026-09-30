@@ -28,6 +28,28 @@ const getOrderStatusTool = activityAsTool({
     },
 });
 
+// Exposes the cancelOrderActivity (see activities.ts) as a tool the LLM can call.
+const cancelOrderTool = activityAsTool({
+    name: 'cancelOrderActivity',
+    description:
+        'Cancel an order, given its order ID and a reason for the cancellation. ' +
+        "Returns {found: true} if the order exists and the cancellation was signaled, or {found: false} if it doesn't.",
+    parameters: {
+        type: Type.OBJECT,
+        properties: {
+            // The activity adds the "order-" workflow-ID prefix itself, so the
+            // model should only ever pass the bare order ID here.
+            orderId: {type: Type.STRING, description: 'The bare order ID, without any prefix.'},
+            reason: {type: Type.STRING, description: 'The reason the order is being cancelled.'},
+        },
+        required: ['orderId', 'reason'],
+    },
+    activity: {
+        startToCloseTimeout: '10 seconds',
+        retry: {maximumAttempts: 2},
+    },
+});
+
 // Define the Agent Workflow
 export async function orderAssistantWorkflow(userId: string): Promise<void> {
     // The ADK Agent definition
@@ -38,7 +60,7 @@ export async function orderAssistantWorkflow(userId: string): Promise<void> {
         instruction: `
       You are an intelligent order management agent.
     `,
-        tools: [getOrderStatusTool],
+        tools: [getOrderStatusTool, cancelOrderTool],
     });
 
     const runner = new InMemoryRunner({agent, appName: 'order-app'});
