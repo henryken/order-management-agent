@@ -1,10 +1,32 @@
 import {InMemoryRunner, isFinalResponse, LlmAgent, stringifyContent} from '@google/adk';
-import {TemporalModel} from '@temporalio/google-adk-agents/workflow';
+import {Type} from '@google/genai';
+import {activityAsTool, TemporalModel} from '@temporalio/google-adk-agents/workflow';
 import * as wf from '@temporalio/workflow';
 
 // Shared Update/Signal definitions, imported by client.ts too
 export const chatMessage = wf.defineUpdate<string, [string]>('chatMessage');
 export const endChat = wf.defineSignal('endChat');
+
+// Exposes the getOrderStatusActivity (see activities.ts) as a tool the LLM can call.
+const getOrderStatusTool = activityAsTool({
+    name: 'getOrderStatusActivity',
+    description:
+        'Get the current status of an order, given its order ID. ' +
+        "Returns {found: true, status: <order status>} if the order exists, or {found: false} if it doesn't.",
+    parameters: {
+        type: Type.OBJECT,
+        properties: {
+            // The activity adds the "order-" workflow-ID prefix itself, so the
+            // model should only ever pass the bare order ID here.
+            orderId: {type: Type.STRING, description: 'The bare order ID, without any prefix.'},
+        },
+        required: ['orderId'],
+    },
+    activity: {
+        startToCloseTimeout: '10 seconds',
+        retry: {maximumAttempts: 2},
+    },
+});
 
 // Define the Agent Workflow
 export async function orderAssistantWorkflow(userId: string): Promise<void> {
@@ -16,6 +38,7 @@ export async function orderAssistantWorkflow(userId: string): Promise<void> {
         instruction: `
       You are an intelligent order management agent.
     `,
+        tools: [getOrderStatusTool],
     });
 
     const runner = new InMemoryRunner({agent, appName: 'order-app'});
