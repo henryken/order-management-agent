@@ -50,6 +50,28 @@ const cancelOrderTool = activityAsTool({
     },
 });
 
+// Exposes the approveDispatchActivity (see activities.ts) as a tool the LLM can call.
+const approveDispatchTool = activityAsTool({
+    name: 'approveDispatchActivity',
+    description:
+        'Approve an order for dispatch, given its order ID and the email address of the approver. ' +
+        "Returns {found: true} if the order exists and the approval was signaled, or {found: false} if it doesn't.",
+    parameters: {
+        type: Type.OBJECT,
+        properties: {
+            // The activity adds the "order-" workflow-ID prefix itself, so the
+            // model should only ever pass the bare order ID here.
+            orderId: {type: Type.STRING, description: 'The bare order ID, without any prefix.'},
+            approverEmail: {type: Type.STRING, description: 'The email address of the person approving the order.'},
+        },
+        required: ['orderId', 'approverEmail'],
+    },
+    activity: {
+        startToCloseTimeout: '10 seconds',
+        retry: {maximumAttempts: 2},
+    },
+});
+
 // Define the Agent Workflow
 export async function orderAssistantWorkflow(userId: string): Promise<void> {
     // The ADK Agent definition
@@ -60,7 +82,7 @@ export async function orderAssistantWorkflow(userId: string): Promise<void> {
         instruction: `
       You are an intelligent order management agent.
     `,
-        tools: [getOrderStatusTool, cancelOrderTool],
+        tools: [getOrderStatusTool, cancelOrderTool, approveDispatchTool],
     });
 
     const runner = new InMemoryRunner({agent, appName: 'order-app'});
