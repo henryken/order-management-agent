@@ -8,6 +8,11 @@ import {config, temporalConnectionOptions} from './config.js';
 
 const require = createRequire(import.meta.url);
 
+// Must match the port src/mcp-server.ts listens on. That server is a
+// separately-run long-lived process (`npm run mcp-server`), not something
+// this Worker spawns — the plugin just needs its URL.
+const MCP_SERVER_PORT = config.mcpServerPort;
+
 async function runWorker() {
     const clientConnection = await Connection.connect(temporalConnectionOptions);
     const client = new Client({connection: clientConnection, namespace: config.temporalNamespace});
@@ -20,8 +25,17 @@ async function runWorker() {
         taskQueue: 'order-agent-queue',
         activities: createActivities(client),
         plugins: [
-            // Injects the TemporalModel activities and bundler configs
-            new GoogleAdkPlugin(),
+            // Injects the TemporalModel activities and bundler configs, and
+            // registers the orderManagement MCP toolset, consumed via
+            // TemporalMCPToolset({name: 'orderManagement'}) in a Workflow.
+            new GoogleAdkPlugin({
+                mcpToolsets: {
+                    orderManagement: () => ({
+                        type: 'StreamableHTTPConnectionParams',
+                        url: `http://localhost:${MCP_SERVER_PORT}/mcp`,
+                    }),
+                },
+            }),
         ],
         bundlerOptions: {
             webpackConfigHook: (config) => {
