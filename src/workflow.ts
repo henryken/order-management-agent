@@ -2,6 +2,10 @@ import {InMemoryRunner, isFinalResponse, LlmAgent, stringifyContent} from '@goog
 import {TemporalModel} from '@temporalio/google-adk-agents/workflow';
 import * as wf from '@temporalio/workflow';
 
+// Shared Update/Signal definitions, imported by client.ts too
+export const chatMessage = wf.defineUpdate<string, [string]>('chatMessage');
+export const endChat = wf.defineSignal('endChat');
+
 // Define the Agent Workflow
 export async function orderAssistantWorkflow(userId: string): Promise<void> {
     // The ADK Agent definition
@@ -19,7 +23,7 @@ export async function orderAssistantWorkflow(userId: string): Promise<void> {
 
     // Handle incoming user messages via a Temporal Update, so the caller
     // gets the agent's reply back synchronously (a Signal has no return value).
-    wf.setHandler(wf.defineUpdate<string, [string]>('chatMessage'), async (message) => {
+    wf.setHandler(chatMessage, async (message) => {
         // Process the message through the ADK agent loop
         const responseStream = runner.runAsync({
             userId,
@@ -39,11 +43,11 @@ export async function orderAssistantWorkflow(userId: string): Promise<void> {
     });
 
     // Let the user end the chat session, completing the Workflow.
-    let endChat = false;
-    wf.setHandler(wf.defineSignal('endChat'), () => {
-        endChat = true;
+    let chatEnded = false;
+    wf.setHandler(endChat, () => {
+        chatEnded = true;
     });
 
     // Keep the ambient agent alive to keep handling chat Updates until asked to stop.
-    await wf.condition(() => endChat);
+    await wf.condition(() => chatEnded);
 }

@@ -1,5 +1,6 @@
 import * as readline from 'node:readline/promises';
 import {Client, Connection} from '@temporalio/client';
+import {chatMessage, endChat, orderAssistantWorkflow} from './workflow.js';
 
 async function runClient() {
     const connection = await Connection.connect();
@@ -11,7 +12,7 @@ async function runClient() {
     // 1. Start the ambient Agent Workflow (or reuse one already running for this user)
     const handle = client.workflow.getHandle(workflowId);
     try {
-        await client.workflow.start('orderAssistantWorkflow', {
+        await client.workflow.start(orderAssistantWorkflow, {
             args: [userId],
             taskQueue: 'order-agent-queue',
             workflowId,
@@ -30,13 +31,13 @@ async function runClient() {
             const message = (await rl.question('you> ')).trim();
             if (!message) continue;
             if (message === 'exit' || message === 'quit') {
-                await handle.signal('endChat');
+                await handle.signal(endChat);
                 console.log('👋 Ending chat session.');
                 break;
             }
 
             // 2. Chat with the agent via a Temporal Update, and print its reply
-            const reply = await handle.executeUpdate('chatMessage', {args: [message]});
+            const reply = await handle.executeUpdate(chatMessage, {args: [message]});
             console.log(`agent> ${reply}\n`);
         }
     } finally {
