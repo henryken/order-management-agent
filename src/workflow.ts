@@ -11,8 +11,10 @@ export async function orderAssistantWorkflow(userId: string): Promise<void> {
     // The ADK Agent definition
     const agent = new LlmAgent({
         name: 'order-assistant',
-        // TemporalModel automatically executes LLM calls as retriable Activities
-        model: new TemporalModel('gemini-3.8-flash'),
+        // TemporalModel automatically executes LLM calls as retriable Activities.
+        // The name is only an identifier; the actual model and endpoint are
+        // resolved by the Worker's modelProvider (OPENAI_MODEL / OPENAI_BASE_URL).
+        model: new TemporalModel('openai-compatible'),
         instruction: `
       You are an intelligent order management agent.
     `,

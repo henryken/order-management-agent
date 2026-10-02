@@ -3,12 +3,21 @@ import * as dotenv from 'dotenv';
 import {Worker} from '@temporalio/worker';
 import {GoogleAdkPlugin} from '@temporalio/google-adk-agents';
 import webpack from 'webpack';
+import {OpenAiLlm} from './openai-llm.js';
 
-// Load environment variables (e.g., GEMINI_API_KEY) before the worker starts
+// Load environment variables (OpenAI endpoint) before the worker starts
 // executing model Activities that need them.
 dotenv.config();
 
 const require = createRequire(import.meta.url);
+
+function requireEnv(name: string): string {
+    const value = process.env[name];
+    if (!value) {
+        throw new Error(`Missing required environment variable: ${name}`);
+    }
+    return value;
+}
 
 async function runWorker() {
     const worker = await Worker.create({
@@ -16,7 +25,13 @@ async function runWorker() {
         taskQueue: 'order-agent-queue',
         plugins: [
             // Injects the TemporalModel activities and bundler configs
-            new GoogleAdkPlugin(),
+          new GoogleAdkPlugin({
+            modelProvider: () => new OpenAiLlm({
+                    model: requireEnv('OPENAI_MODEL'),
+                    baseURL: requireEnv('OPENAI_BASE_URL'),
+                    apiKey: requireEnv('OPENAI_API_KEY'),
+                }),
+            }),
         ],
         bundlerOptions: {
             webpackConfigHook: (config) => {
