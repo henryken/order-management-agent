@@ -8,7 +8,7 @@ export async function orderAssistantWorkflow(userId: string): Promise<void> {
     const agent = new LlmAgent({
         name: 'order-assistant',
         // TemporalModel automatically executes LLM calls as retriable Activities
-        model: new TemporalModel('gemini-3.8-flash'),
+        model: new TemporalModel('gemini-flash'),
         instruction: `
       You are an intelligent order management agent.
     `,
