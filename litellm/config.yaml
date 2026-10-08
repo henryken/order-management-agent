@@ -1,0 +1,9 @@
+model_list:
+  - model_name: gemini-flash
+    litellm_params:
+      model: vertex_ai/gemini-3.5-flash-lite
+      vertex_project: os.environ/VERTEXAI_PROJECT
+      vertex_location: os.environ/VERTEXAI_LOCATION
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
