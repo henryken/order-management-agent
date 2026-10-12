@@ -1,0 +1,33 @@
+# Dev container stack. The "app" container (where you run the worker, MCP server and client)
+# joins the network of the order-management-app dev container and reaches its Temporal
+# server by service name. Start that dev container first.
+
+# Distinct project name; the default ("devcontainer", from the folder) would collide with
+# the order-management-app stack.
+name: order-management-agent
+
+services:
+  app:
+    # Shared base image from order-management-app (Java, Node, Go, Python, temporal CLI, uv)
+    image: ghcr.io/henryken/order-mgmt-devcontainer:1
+    command: sleep infinity
+    volumes:
+      - ..:/workspaces/order-management-agent:cached
+      # Linux-only node_modules, so the container does not overwrite the host's install
+      - node_modules:/workspaces/order-management-agent/node_modules
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      # Dependency caches live in the repo (gitignored) so they survive container recreation
+      npm_config_cache: /workspaces/order-management-agent/.devcache/npm
+    networks:
+      - order-management
+
+volumes:
+  node_modules:
+
+networks:
+  order-management:
+    # Default network of the order-management-app dev container (its compose project is
+    # named "devcontainer" after the folder)
+    name: devcontainer_default
+    external: true

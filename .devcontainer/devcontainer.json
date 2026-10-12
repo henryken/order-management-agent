@@ -1,0 +1,19 @@
+{
+  "name": "Order Management Agent",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/order-management-agent",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "forwardPorts": [3100],
+  "portsAttributes": {
+    "3100": { "label": "order-management MCP server" }
+  },
+  "customizations": {
+    "jetbrains": {
+      "backend": "WebStorm"
+    },
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint"]
+    }
+  }
+}
