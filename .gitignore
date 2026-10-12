@@ -32,3 +32,6 @@ logs/
 ### Misc ###
 *.tmp
 *.bak
+
+### Dev container ###
+.devcache/
